@@ -1,0 +1,23 @@
+THUG2 - Tony Hawk's Underground 2, running natively on the PS Vita
+Not emulated, rebuilt: the game engine is recompiled for the Vita's ARM CPU,
+with a graphics backend written on top of vitaGL.
+
+This package contains no game data. You need your own copy of the Xbox game.
+
+Tony Hawk's Underground 2 (c) 2004 Activision. Developed by Neversoft.
+This is a fan project, not affiliated with or endorsed by Activision,
+Neversoft or Sony. PlayStation and PS Vita are trademarks of Sony
+Interactive Entertainment. All other trademarks belong to their owners.
+
+Credits
+- Port: iwannagooutside, with Claude (Anthropic) doing most of the porting
+  work through a custom test harness.
+- kisak-thug (SwagSoftware): the PC source port this engine builds on.
+  https://github.com/SwagSoftware/kisak-thug
+- The THUG1 PS Vita port (same engine, same author).
+- The THUG Pro team: the HD redraws of the HUD (score, special bar, balance
+  meter, stance icons, trick font) in the hd/ folder of this package come from
+  THUG Pro and are used with permission. https://thugpro.com
+- FFmpeg (LGPL 2.1+, https://ffmpeg.org) for the Bink video decoder.
+- vitaGL by Rinnegatamante, and the vitasdk team.
+

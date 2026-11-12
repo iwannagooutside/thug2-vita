@@ -1,0 +1,41 @@
+name: Bug report
+description: Something looks wrong, crashes or behaves differently from the Xbox version.
+labels: [bug]
+body:
+  - type: input
+    id: build
+    attributes:
+      label: Version
+      description: Release tag (for example v1.0), or the commit if you built it yourself.
+    validations:
+      required: true
+  - type: input
+    id: level
+    attributes:
+      label: Level and mode
+      description: For example "Barcelona, Story mode" or "Create-A-Park".
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you were doing, what you expected, what you got. Does it happen again?
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Attach or paste ux0:data/thug2-vita/thug.log (or thug.prev.log if you restarted the game since).
+      render: text
+  - type: textarea
+    id: shot
+    attributes:
+      label: Photo or screenshot
+      description: Drag an image here. A phone photo of the screen is fine.
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Vita model or PS TV, controller, firmware, plugins, and whether you changed anything in ux0:data/thug2/Data.

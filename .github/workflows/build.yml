@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  vita:
+    # macOS: the engine's include paths rely on a case-insensitive file system.
+    runs-on: macos-latest
+    env:
+      VITASDK: ${{ github.workspace }}/vitasdk
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install vitasdk
+        run: |
+          git clone --depth 1 https://github.com/vitasdk/vdpm
+          cd vdpm
+          ./bootstrap-vitasdk.sh
+          export PATH="$VITASDK/bin:$PATH"
+          yes | vdpm vitaGL zlib
+          echo "$VITASDK/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        run: |
+          cmake -S vita -B build-thug2 \
+            -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.toolchain.cmake" \
+            -DTHUG2_APP=ON -DTHUG2_RELEASE=ON
+
+      - name: Build
+        run: make -C build-thug2 -j3
+
+      - name: Check the public build
+        run: bash vita/release/thug2/verifier_release.sh build-thug2
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: thug2-vita-unofficial-build
+          path: |
+            build-thug2/eboot.bin
+            build-thug2/thug_vita.vpk

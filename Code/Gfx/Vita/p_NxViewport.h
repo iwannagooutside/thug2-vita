@@ -1,0 +1,4 @@
+#ifndef __GFX_VITA_P_NXVIEWPORT_H__
+#define __GFX_VITA_P_NXVIEWPORT_H__
+
+#endif // __GFX_VITA_P_NXVIEWPORT_H__

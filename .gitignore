@@ -1,0 +1,47 @@
+# Build
+vita/build/
+vita/build_*/
+build/
+*.vpk
+*.velf
+*.self
+eboot.bin
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Game data and anything extracted from it: never in this repository
+Data/
+data/
+*.iso
+*.xbe
+*.qb
+*.pre
+*.prx
+*.prd
+*.prf
+*.bik
+*.wad
+*.dat
+*.img
+*.xbx
+*.tex
+*.ska
+*.skin
+*.wav
+*.pcm
+*.hd
+
+# Generated LiveArea and HD pack (made from game data, kept outside the repo)
+vita/sce_sys/*.png
+vita/sce_sys/livearea/contents/*.png
+vita/boot/
+
+# Local files
+vita/tools/vita_ip.txt
+*.log
+*.psp2dmp
+.DS_Store
+__pycache__/
+*.pyc
