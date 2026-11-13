@@ -62,6 +62,10 @@ public:
 	int			m_outside_flags;	// bitmask of flags, 0 = inside the radius, 1 = outside
 
 	int 		m_type;
+	// thug2-i1416 : << type = object >> (THUG2 : m_type 2, XBE 0x000a7880) -> teste a la position du
+	// skater, pas a celle de la camera (Skate::DoUpdate 0x00139630 : Proxim_Update(.., camera, 1) puis
+	// Proxim_Update(.., &skater->m_pos, 2)).
+	bool		m_thug2_object;
 	EShape 		m_shape;
 
 	// Sphere data

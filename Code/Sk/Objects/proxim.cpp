@@ -107,6 +107,18 @@ void Proxim_AddNode(int node,bool active)
 
 	pProximNode->m_type = 0;  
 	pNode->GetInteger( 0x7321a8d6 /* type */, &pProximNode->m_type );
+	// thug2-i1416 (issue publique #16 / C63) : THUG2 lit << type >> comme un nom (XBE 0x000a7880 :
+	// camera 0xc4e311fa -> 1, object 0x57525413 -> 2, none 0x806fff30 -> 0) et Skate::DoUpdate
+	// (0x00139630) appelle Proxim_Update une fois par type : camera a la position de la camera, object
+	// a la position du skater (+0x4c). Le port testait tous les noeuds a la camera : la boite de la
+	// catapulte de Barcelone (TRGB_BA_Castle_Catapult01/02, type = object), ou la porte du chateau
+	// depose le skater, ne contient pas la camera -> BA_Teleport_Catapult jamais lance, le skater
+	// reste en haut du chateau. Seuls les noeuds << object >> changent (9 dans les donnees THUG2 :
+	// catapultes et Steve-O de BA, boites de musique de BE, BO, NO) ; les autres restent a la camera.
+	{
+		uint32 type_name = 0;
+		pProximNode->m_thug2_object = pNode->GetChecksum( 0x7321a8d6 /* type */, &type_name ) && ( type_name == 0x57525413 /* object */ );
+	}
 #ifdef	DEBUG_PROXIM
 	printf ("Proxim:  Type = %d\n",pProximNode->m_type);
 #endif
@@ -255,7 +267,19 @@ void Proxim_Update ( uint32 trigger_mask, CObject* p_script_target, const Mth::V
 			continue;
 		}
 			
-		bool now_inside = pProximNode->CheckInside(pos);
+		// thug2-i1416 : noeud << object >> -> position de l'objet (le skater), comme l'XBE (voir
+		// Proxim_AddNode) ; sans objet (observateur), l'XBE ne met a jour que les noeuds camera.
+		const Mth::Vector *p_test_pos = &pos;
+		if (pProximNode->m_thug2_object)
+		{
+			if (!p_script_target || !(p_script_target->GetFlags() & CObject::vCOMPOSITE))
+			{
+				pProximNode = pProximNode->m_pNext;
+				continue;
+			}
+			p_test_pos = &static_cast< CCompositeObject* >(p_script_target)->GetPos();
+		}
+		bool now_inside = pProximNode->CheckInside(*p_test_pos);
 
 		if ( trigger_mask & pProximNode->m_outside_flags)
 		{

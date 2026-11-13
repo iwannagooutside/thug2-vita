@@ -80,6 +80,7 @@ namespace Nx { extern bool g_vita_img_cache; }
 namespace NxVita { extern bool g_vita_env_x; }	// issue #72, passes 2-3 en reflet
 namespace NxVita { extern bool g_vita_zeq; }	// test de profondeur du decor (LEQUAL)
 namespace NxVita { extern int g_vita_cadence; }	// p_nx.cpp, FixerCadence ("framerate")
+namespace NxVita { extern int g_vita_cadence_file; }	// p_nx.cpp, "fpq" (thug2-i13)
 namespace NxVita { extern int g_vita_mx2; void JournaliserTextes( void ); }
 namespace NxVita { extern int g_vita_sprites_sans_tex; }
 namespace Nx { extern bool g_vita_rigide_gpu; }	// "rgp" (#67)
@@ -1003,6 +1004,18 @@ static void injection_analyser( char *buf )
 			      NxVita::g_vita_occlusion ? "OUI" : "non" );
 			while( *q && *q != ' ' && *q != '\n' && *q != '\r' && *q != '\t' )
 				++q;
+			p = (char *)q;
+			continue;
+		}
+		// "fpq N" (thug2-i13, #13 public) : a 30 i/s, images en vol autorisees apres la
+		// presentation (1 par defaut, regime du 60 i/s ; 0 = pas de borne, comme la v1.0.1).
+		else if( strncmp( p, "fpq", 3 ) == 0 )
+		{
+			const char *q = p + 3;
+			while( *q == ' ' || *q == '=' ) ++q;
+			NxVita::g_vita_cadence_file = atoi( q );
+			VLOG( "GFX", "thug2-i13 : file d'affichage bornee a 30 i/s (fpq) %d", NxVita::g_vita_cadence_file );
+			while( *q && *q != ' ' && *q != '\n' && *q != '\r' ) ++q;
 			p = (char *)q;
 			continue;
 		}

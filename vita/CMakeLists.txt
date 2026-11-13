@@ -120,10 +120,10 @@ if(NV_GAME STREQUAL "THUG2")
     # TITLEID et memes dossiers que l'app de test (donnees ux0:data/thug2/Data, ecritures et
     # sauvegardes ux0:data/thug2-vita) : elle la remplace a l'installation et reprend ses
     # sauvegardes telles quelles. THUG_RELEASE (outils de debug retires, voir plus haut),
-    # nom "THUG2", version 01.01, LiveArea DA exigee, pack HD embarque. Sans l'option : le profil de test, inchange.
+    # nom "THUG2", version 01.02, LiveArea DA exigee, pack HD embarque. Sans l'option : le profil de test, inchange.
     if(THUG2_RELEASE)
       set(VITA_APP_NAME "THUG2")
-      set(VITA_VERSION  "01.01")
+      set(VITA_VERSION  "01.02")
       add_compile_definitions(THUG_RELEASE THUG2_RELEASE)
       message(STATUS "THUG2 : build de SORTIE (THUG2_RELEASE : outils de debug retires, version ${VITA_VERSION})")
     endif()

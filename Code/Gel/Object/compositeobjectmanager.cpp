@@ -96,6 +96,7 @@
 #include <gel/components/famcomponent.h>
 #include <gel/components/flexibleparticlecomponent.h>
 #include <sk/components/thug2taggingcontrolcomponent.h>
+#include <sk/components/thug2bboxcomponent.h>
 #include <sk/components/thug2projectilecomponents.h>
 #include <sk/components/thug2skatervehiclesoundcomponent.h>
 #include <sk/components/thug2taggingcomponent.h>
@@ -212,6 +213,8 @@ CCompositeObjectManager::CCompositeObjectManager()
 	RegisterComponent(CRC_FLEXIBLEPARTICLE,					CFlexibleParticleComponent::s_create);
 	// thug2-fn : composant TaggingControl (fabrique 0x001a2100 ; Sk/Components/Thug2TaggingControlComponent.cpp).
 	RegisterComponent(CRC_THUG2_TAGGINGCONTROL,				CThug2TaggingControlComponent::s_create);
+	// thug2-i1416 : composant bbox des objets de jeu (constructeur 0x00079fc0 ; Sk/Components/Thug2BBoxComponent.cpp).
+	RegisterComponent(CRC_THUG2_BBOX,						CThug2BBoxComponent::s_create);
 	// thug2-c3 : composant tagging (fabrique 0x001a1dc0 ; Sk/Components/Thug2TaggingComponent.cpp).
 	RegisterComponent(CRC_THUG2_TAGGING,					CThug2TaggingComponent::s_create);
 	// thug2-story2 : projectiles (fabriques 0x0017e6d0 / 0x0017e410 ; Sk/Components/Thug2ProjectileComponents.cpp).

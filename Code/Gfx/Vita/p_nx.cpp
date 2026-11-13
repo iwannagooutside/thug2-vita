@@ -54,6 +54,10 @@
 
 #include "vita_log.h"
 #include "vita_dbgsrv.h"
+#include "thug2_cadence.h"
+#include <psp2/kernel/threadmgr.h>
+extern "C" { extern uint32_t vgl_framecount; }
+namespace NxVita { void CadenceInstallerRappel( void ); void CadenceApresPresentation( void ); }
 extern "C" int vita_ecran_boot( void );
 // C34 : logo anime au demarrage (vita/src/vita_logo_boot.c), 1 = joue jusqu'au bout.
 extern "C" int vita_logo_boot( void );
@@ -585,6 +589,8 @@ extern "C" void vita_vgl_init_tot( void )
 	VLOG( "GFX", "vglInit -> %d (%s)", (int)res_fallback,
 		  res_fallback ? "resolution rabaissee" : "resolution accordee" );
 	VLOG( "GFX", "GL_VERSION=%s", (const char *)glGetString( GL_VERSION ));
+	// thug2-i13 : compteur des images entrees dans le rappel d'affichage (file bornee a 30 i/s).
+	NxVita::CadenceInstallerRappel();
 	// Build THUG2 : donnees absentes, incompletes ou mal placees (cas le plus
 	// frequent a l'installation) -> message clair et START pour quitter, au lieu
 	// d'un plantage plus loin (qui serait en plus mis sur le compte du logo).
@@ -985,6 +991,8 @@ void	CEngine::s_plat_post_render()
 	vglSwapBuffers( GL_FALSE );
 	NxVita::g_vita_smp_bloc = NxVita::SMP_PRES_AUTRE;
 	ACC( ACC_SWAP );
+	// thug2-i13 (#13 public) : a 30 i/s, au plus "fpq" image(s) en vol avant d'entamer la suivante.
+	NxVita::CadenceApresPresentation();
 	// "gpf 0/1" : temps GPU de l'image (glFinish juste apres la presentation,
 	// CPU et GPU serialises : pour la mesure A/B seulement), moyenne [GPU] par
 	// 60 images. Coupe par defaut : aucun effet sur le rendu ni la cadence.
@@ -1556,10 +1564,92 @@ bool g_vita_fond_violet = false;
 // demarrage (vsync_interval = 1, vgl.c).
 int g_vita_cadence = 60;
 
+// thug2-i13 (issue publique #13, C60 : « passer de 60 a 30 i/s dans le menu pause fait planter le
+// jeu apres quelques secondes », Barcelone). Voir thug2_cadence.h. "fpq N" : a 30 i/s, au plus N
+// image(s) presentee(s) et pas encore a l'ecran quand le CPU entame l'image suivante. 1 = regime du
+// 60 i/s (GPU au plus une image derriere) ; 0 = pas de borne (v1.0.1 : jusqu'a 2 images en vol).
+int g_vita_cadence_file = 1;
+
+// Rappel d'affichage de vitaGL (vglSetDisplayCallback) : appele par le fil de la file d'affichage
+// de GXM quand une image, rendue par le GPU, va passer a l'ecran (gxm.c display_queue_callback,
+// avant sceDisplaySetFrameBuf et l'attente des vsync). Un seul ecrivain, lecture par le principal.
+static volatile unsigned int s_cad_affichees = 0;
+static int  s_cad_base = 0;
+static bool s_cad_rappel = false;
+static void cad_rappel_affichage( void * )
+{
+	s_cad_affichees = s_cad_affichees + 1;
+}
+
+void CadenceInstallerRappel( void )
+{
+	if( s_cad_rappel )
+		return;
+	s_cad_base = (int)( vgl_framecount - s_cad_affichees );
+	vglSetDisplayCallback( cad_rappel_affichage );
+	s_cad_rappel = true;
+	VLOG( "GFX", "thug2-i13 : rappel d'affichage installe (images presentees %u, file bornee a %d a 30 i/s)",
+	      (unsigned)vgl_framecount, g_vita_cadence_file );
+}
+
+// Juste apres vglSwapBuffers (s_plat_post_render). Bilan [GFX] toutes les 10 s a 30 i/s.
+void CadenceApresPresentation( void )
+{
+	static unsigned int s_n = 0, s_attentes = 0, s_delais = 0, s_somme_vol = 0;
+	static int s_max_vol = 0;
+	static SceUInt64 s_us_att = 0, s_us_max = 0, s_t_bilan = 0;
+	if(( g_vita_cadence != 30 ) || !s_cad_rappel )
+	{
+		s_t_bilan = 0;
+		return;
+	}
+	const SceUInt64 t0 = sceKernelGetProcessTimeWide();
+	if( !s_t_bilan )
+		s_t_bilan = t0;
+	s_cad_base = Cadence::BaseCorrigee( vgl_framecount, s_cad_affichees, s_cad_base );
+	int en_vol = Cadence::EnVol( vgl_framecount, s_cad_affichees, s_cad_base );
+	s_somme_vol += (unsigned int)en_vol;
+	if( en_vol > s_max_vol )
+		s_max_vol = en_vol;
+	if( Cadence::Attendre( g_vita_cadence, g_vita_cadence_file, en_vol ))
+	{
+		++s_attentes;
+		// Borne : 100 ms (6 vsync). Au-dela, on repart sans attendre (jamais de blocage).
+		while( Cadence::Attendre( g_vita_cadence, g_vita_cadence_file,
+		                          Cadence::EnVol( vgl_framecount, s_cad_affichees, s_cad_base )))
+		{
+			if( sceKernelGetProcessTimeWide() - t0 > 100000 )
+			{
+				++s_delais;
+				break;
+			}
+			sceKernelDelayThread( 200 );
+		}
+		const SceUInt64 att = sceKernelGetProcessTimeWide() - t0;
+		s_us_att += att;
+		if( att > s_us_max )
+			s_us_max = att;
+	}
+	++s_n;
+	if( t0 - s_t_bilan >= 10000000 )
+	{
+		VLOG( "GFX", "thug2-i13 : 30 i/s, %u images en %.1f s : en vol a la presentation moy %.2f max %d ; "
+		             "%u attentes (fpq %d), %.2f ms/image, max %.2f ms, %u depassement(s) de 100 ms",
+		      s_n, (float)( t0 - s_t_bilan ) / 1000000.0f, (float)s_somme_vol / (float)s_n, s_max_vol,
+		      s_attentes, g_vita_cadence_file, (float)s_us_att / 1000.0f / (float)s_n,
+		      (float)s_us_max / 1000.0f, s_delais );
+		s_n = s_attentes = s_delais = s_somme_vol = 0;
+		s_max_vol = 0;
+		s_us_att = s_us_max = 0;
+		s_t_bilan = t0;
+	}
+}
+
 void FixerCadence( int images_par_seconde )
 {
 	g_vita_cadence = ( images_par_seconde == 30 ) ? 30 : 60;
 	eglSwapInterval( 0, ( images_par_seconde == 30 ) ? 2 : 1 );
-	VLOG( "GFX", "cadence : %d images/s", ( images_par_seconde == 30 ) ? 30 : 60 );
+	VLOG( "GFX", "cadence : %d images/s (file bornee fpq %d)", ( images_par_seconde == 30 ) ? 30 : 60,
+	      g_vita_cadence_file );
 }
 }

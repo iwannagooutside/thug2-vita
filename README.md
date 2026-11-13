@@ -206,6 +206,9 @@ Tracked in the [issues](https://github.com/iwannagooutside/thug2-vita/issues). A
   50s since v1.0.1. *Frame Rate: 30 fps* in Vita Options gives a steadier picture there.
 - [#2](https://github.com/iwannagooutside/thug2-vita/issues/2) Buttslaps can trigger on their own when you ollie late off a ramp. That's
   how the Xbox version behaves too (late ollie), not a port bug.
+- [#13](https://github.com/iwannagooutside/thug2-vita/issues/13) One player saw a crash a few seconds after switching to 30 fps. We
+  couldn't reproduce it; v1.0.2 includes a possible fix. If it happens to you, please attach
+  `ux0:data/thug2-vita/thug.log` to the issue.
 - The game's videos are new in this version and haven't been checked on every
   video yet. If one stutters, freezes or has no sound, skip it with START or
   ✕, and please open an issue. Deleting the `movies` folder skips them all.

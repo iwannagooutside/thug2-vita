@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.0.2
+
+Player fixes. App version 01.02; installs over v1.0.1 or v1.0.0 and keeps saves,
+settings and game files.
+
+**Fixes**
+- Barcelona: after freeing the bull, skaters no longer double jump on their own
+  to extreme heights. The bull's dung only bounces you when you ride over it (#14).
+- Barcelona: the castle catapults launch you again instead of leaving you on
+  the roof (#16). The same fix wakes up hidden Steve-O in Barcelona and the
+  ambient music boxes in Berlin, Boston and New Orleans.
+- Boston: the pro goal "Skitch a Seaworthy Vehicle" starts when you skitch the
+  amphibious duck: the 20-second timer shows and the goal counts toward 100% (#15).
+- 30 fps mode: the display queue is limited to one frame, as at 60 fps. Possible
+  fix for a crash reported a few seconds after switching to 30 fps (#13), which
+  we could not reproduce.
+
 ## v1.0.1
 
 Player fixes and performance. App version 01.01; installs over v1.0.0 and keeps

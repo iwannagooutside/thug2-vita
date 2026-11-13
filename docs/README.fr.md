@@ -189,6 +189,9 @@ Suivis dans les [issues](../../../issues). À la sortie :
 - [#2](https://github.com/iwannagooutside/thug2-vita/issues/2) Des buttslaps peuvent partir seuls quand on fait un ollie tardif en haut
   d'une rampe : la version Xbox fait pareil (late ollie), ce n'est pas un bug
   du port.
+- [#13](https://github.com/iwannagooutside/thug2-vita/issues/13) Un joueur a vu un plantage quelques secondes après le passage à
+  30 i/s. Nous ne l'avons pas reproduit ; la v1.0.2 contient un correctif possible. Si ça vous arrive,
+  joignez `ux0:data/thug2-vita/thug.log` à l'issue.
 - Les vidéos du jeu sont nouvelles dans cette version et n'ont pas encore été
   vérifiées une par une. Si l'une saccade, se fige ou n'a pas de son, passez-la
   avec START ou ✕ et ouvrez une issue. Supprimer le dossier `movies` les saute

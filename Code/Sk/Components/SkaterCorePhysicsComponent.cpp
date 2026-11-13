@@ -5486,6 +5486,12 @@ void CSkaterCorePhysicsComponent::maybe_skitch (   )
 		control_pad.m_R1.ClearTrigger();
 		mp_skitch_object = p_closest;
 
+		// THUG2 maybe_skitch (0x0018b258-0x0018b27c) [VERIFIE] : << Skitched >> est aussi envoye a l'objet
+		// skitche (SelfEvent 0x000578c0 sur p_closest, puis sur le skater). Les vehicules dont le script
+		// pose Obj_SetException ex = Skitched (Car_Generic01 { Skitch = ... }) en dependent : le canard de
+		// Boston (BO_Car_Duck01/02 -> BO_DuckSkitch -> BO_DuckManager_Skitching, goal BO_Goal_Gaps6,
+		// issue publique #15).
+		p_closest->SelfEvent(CRCD(0x2f184eb1, "Skitched"));
 		FLAGEXCEPTION(CRCD(0x2f184eb1, "Skitched"));
 	}
 }

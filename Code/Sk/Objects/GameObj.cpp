@@ -27,6 +27,7 @@
 
 #include <sk/modules/skate/skate.h>
 #include <sk/scripting/nodearray.h>
+#include <sk/components/thug2bboxcomponent.h>
 
 /*****************************************************************************
 **								  Externals									**
@@ -82,6 +83,10 @@ Obj::CCompositeObject* create_game_obj( CGeneralManager* p_obj_man, Script::CStr
 	#endif
 
 	Script::RunScript( CRCD(0xf3b84da6,"gameobj_add_components"), pNodeData, pGameObj );
+
+	// thug2-i1416 : XBE THUG2 0x00142a00, composant bbox (0x00079fc0) ajoute apres
+	// gameobj_add_components (Sk/Components/Thug2BBoxComponent.cpp).
+	pGameObj->AddComponent( new CThug2BBoxComponent );
 
 	pGameObj->Finalize();
 
